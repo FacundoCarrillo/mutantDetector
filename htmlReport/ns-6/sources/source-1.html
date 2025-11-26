@@ -1,0 +1,92 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > DnaRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.mutantes.mutantdetector.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: DnaRepository (com.mutantes.mutantdetector.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">DnaRepository$MockitoMock$ER0H8bMN</td>
+  </tr>
+  <tr>
+    <td class="name">DnaRepository$MockitoMock$ER0H8bMN$auxiliary$AuIh8cEY</td>
+  </tr>
+  <tr>
+    <td class="name">DnaRepository$MockitoMock$ER0H8bMN$auxiliary$CUcWlHZC</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.mutantes.mutantdetector.repository;
+&nbsp;
+&nbsp;import com.mutantes.mutantdetector.model.DnaRecord;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;// Extiende JpaRepository para tener métodos como save(), findAll(), etc. [cite: 103]
+&nbsp;public interface DnaRepository extends JpaRepository&lt;DnaRecord, Long&gt; {
+&nbsp;
+&nbsp;    // Metodo mágico de Spring Data para buscar por la secuencia de ADN
+&nbsp;    // Esto nos servirá para verificar si ya analizamos este ADN antes
+&nbsp;    Optional&lt;DnaRecord&gt; findByDna(String dna);
+&nbsp;    // AGREGAR ESTE METODO: Cuenta registros filtrando por si es mutante o no
+&nbsp;    long countByIsMutant(boolean isMutant);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-26 00:26</div>
+</div>
+</body>
+</html>

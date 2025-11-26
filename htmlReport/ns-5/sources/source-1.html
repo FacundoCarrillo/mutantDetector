@@ -1,0 +1,234 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > MutantService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.mutantes.mutantdetector.service</a>
+</div>
+
+<h1>Coverage Summary for Class: MutantService (com.mutantes.mutantdetector.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MutantService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80,8%
+  </span>
+  <span class="absValue">
+    (42/52)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95,3%
+  </span>
+  <span class="absValue">
+    (41/43)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.mutantes.mutantdetector.service;
+&nbsp;
+&nbsp;import com.mutantes.mutantdetector.dto.DnaRequest;
+&nbsp;import com.mutantes.mutantdetector.model.DnaRecord;
+&nbsp;import com.mutantes.mutantdetector.repository.DnaRepository;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Service
+&nbsp;public class MutantService {
+&nbsp;
+&nbsp;    private final DnaRepository dnaRepository;
+&nbsp;
+&nbsp;    // Constante para la cantidad de letras iguales necesarias
+&nbsp;    private static final int SEQUENCE_LENGTH = 4;
+&nbsp;
+<b class="fc">&nbsp;    public MutantService(DnaRepository dnaRepository) {</b>
+<b class="fc">&nbsp;        this.dnaRepository = dnaRepository;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // --- METODO PRINCIPAL QUE LLAMARA EL CONTROLLER ---
+&nbsp;    public boolean analyzeDna(String[] dna) {
+&nbsp;        // 1. Convertimos el array a String para buscarlo en BD
+<b class="fc">&nbsp;        String dnaString = String.join(&quot;,&quot;, dna);</b>
+&nbsp;
+&nbsp;        // 2. Verificamos si ya existe en base de datos (Nivel 3)
+<b class="fc">&nbsp;        Optional&lt;DnaRecord&gt; existingDna = dnaRepository.findByDna(dnaString);</b>
+<b class="fc">&nbsp;        if (existingDna.isPresent()) {</b>
+&nbsp;            // Si ya lo analizamos antes, devolvemos el resultado guardado
+<b class="fc">&nbsp;            return existingDna.get().isMutant();</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 3. Si es nuevo, corremos el algoritmo (Nivel 1)
+<b class="fc">&nbsp;        boolean isMutant = isMutant(dna);</b>
+&nbsp;
+&nbsp;        // 4. Guardamos el resultado en BD
+<b class="fc">&nbsp;        DnaRecord dnaRecord = new DnaRecord();</b>
+<b class="fc">&nbsp;        dnaRecord.setDna(dnaString);</b>
+<b class="fc">&nbsp;        dnaRecord.setMutant(isMutant);</b>
+<b class="fc">&nbsp;        dnaRepository.save(dnaRecord);</b>
+&nbsp;
+<b class="fc">&nbsp;        return isMutant;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // --- ALGORITMO DE DETECCION (NIVEL 1) ---
+&nbsp;    public boolean isMutant(String[] dna) {
+&nbsp;        // Validaciones básicas (N x N y caracteres válidos)
+<b class="pc">&nbsp;        if (dna == null || dna.length == 0) return false;</b>
+<b class="fc">&nbsp;        int n = dna.length;</b>
+&nbsp;
+&nbsp;        // Validación rápida de tamaño (NxN) y caracteres
+<b class="fc">&nbsp;        for (String row : dna) {</b>
+<b class="pc">&nbsp;            if (row.length() != n) return false; // No es cuadrada</b>
+<b class="pc">&nbsp;            if (!row.matches(&quot;[ATCG]+&quot;)) return false; // Letras invalidas [cite: 81]</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        int sequenceCount = 0;</b>
+&nbsp;
+&nbsp;        // Recorremos la matriz
+<b class="fc">&nbsp;        for (int i = 0; i &lt; n; i++) {</b>
+<b class="fc">&nbsp;            for (int j = 0; j &lt; n; j++) {</b>
+&nbsp;
+&nbsp;                // Solo verificamos si no hemos encontrado ya más de 1 secuencia (Optimización)
+<b class="pc">&nbsp;                if (sequenceCount &gt; 1) return true;</b>
+&nbsp;
+<b class="fc">&nbsp;                char currentChar = dna[i].charAt(j);</b>
+&nbsp;
+&nbsp;                // 1. Horizontal (Solo si hay espacio a la derecha)
+<b class="fc">&nbsp;                if (j + SEQUENCE_LENGTH &lt;= n) {</b>
+<b class="fc">&nbsp;                    if (checkLine(dna, i, j, 0, 1, currentChar)) {</b>
+<b class="fc">&nbsp;                        sequenceCount++;</b>
+<b class="fc">&nbsp;                        if (sequenceCount &gt; 1) return true;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;
+&nbsp;                // 2. Vertical (Solo si hay espacio hacia abajo)
+<b class="fc">&nbsp;                if (i + SEQUENCE_LENGTH &lt;= n) {</b>
+<b class="fc">&nbsp;                    if (checkLine(dna, i, j, 1, 0, currentChar)) {</b>
+<b class="fc">&nbsp;                        sequenceCount++;</b>
+<b class="fc">&nbsp;                        if (sequenceCount &gt; 1) return true;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;
+&nbsp;                // 3. Diagonal Principal (\) (Solo si hay espacio abajo y derecha)
+<b class="fc">&nbsp;                if (i + SEQUENCE_LENGTH &lt;= n &amp;&amp; j + SEQUENCE_LENGTH &lt;= n) {</b>
+<b class="fc">&nbsp;                    if (checkLine(dna, i, j, 1, 1, currentChar)) {</b>
+<b class="fc">&nbsp;                        sequenceCount++;</b>
+<b class="pc">&nbsp;                        if (sequenceCount &gt; 1) return true;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;
+&nbsp;                // 4. Diagonal Secundaria (/) (Solo si hay espacio abajo y izquierda)
+<b class="fc">&nbsp;                if (i + SEQUENCE_LENGTH &lt;= n &amp;&amp; j - SEQUENCE_LENGTH + 1 &gt;= 0) {</b>
+<b class="pc">&nbsp;                    if (checkLine(dna, i, j, 1, -1, currentChar)) {</b>
+<b class="nc">&nbsp;                        sequenceCount++;</b>
+<b class="nc">&nbsp;                        if (sequenceCount &gt; 1) return true;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+&nbsp;        // Es mutante si encontramos más de 1 secuencia
+<b class="pc">&nbsp;        return sequenceCount &gt; 1;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Metodo auxiliar genérico para verificar 4 letras consecutivas
+&nbsp;    // deltaRow: cuánto me muevo en filas
+&nbsp;    // deltaCol: cuánto me muevo en columnas
+&nbsp;    private boolean checkLine(String[] dna, int row, int col, int deltaRow, int deltaCol, char match) {
+<b class="fc">&nbsp;        for (int k = 1; k &lt; SEQUENCE_LENGTH; k++) {</b>
+<b class="fc">&nbsp;            if (dna[row + k * deltaRow].charAt(col + k * deltaCol) != match) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-26 00:26</div>
+</div>
+</body>
+</html>
